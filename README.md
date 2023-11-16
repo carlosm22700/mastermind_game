@@ -1,4 +1,4 @@
 # TODO
-imeplement DRF
-imeplement redis
-refactor and test logic
+imeplement DRF - done
+imeplement redis - done
+refactor and test logic 
