@@ -20,9 +20,8 @@ def fetch_random_numbers():
         response = requests.get(url, params=params)
         if response.status_code == 200:
             # Log the response text to see how its received
-            random_integers = response.text
-            # print("Response from Random.org:", random_integers)
-            # Additional processing can go here
+            random_integers = response.text.split()
+            # Additional processing can go here if needed. for now an array of nums as strings is fine.
             return random_integers
         else:
             print("Failed to fetch random numbers:", response.status_code)
