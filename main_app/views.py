@@ -1,12 +1,35 @@
 from django.core.cache import cache
 
 from django.contrib.auth.models import User, Group
+from rest_framework import viewsets
+from rest_framework import permissions
+
+
+from .serializers import GroupSerializer, UserSerializer
 
 # from main_app.api_views import StartGameView, MakeGuessView, EndGameView
 
 from main_app.utils.services import RandomNumberService
 
 # Create views here.
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    '''
+    API endpoint that allows users to be viewed or edited.
+    '''
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    '''
+    API endpoint that allows groups to be viewed or edited.
+    '''
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class MastermindGame:
