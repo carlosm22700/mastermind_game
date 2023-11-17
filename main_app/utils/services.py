@@ -25,9 +25,11 @@ class RandomNumberService:
             response = requests.get(self.url, params=self.params)
             if response.status_code == 200:  # if get request is successful successful
                 # Log the response text and preprocess with split() to remove whitespace and \n to create a winning combination
-                winning_combination = response.text.split()
+                response_list = response.text.split()
                 # Additional processing can go here if needed. for now an array of nums as strings is fine.
-                return winning_combination
+                processed_response = [int(num) for num in response_list]
+                # turn input into list of integers instead of list of strings ex: [1, 2, 3, 4]
+                return processed_response
             # if the HTTP
             else:
                 # Handle non-successful HTTP status code
