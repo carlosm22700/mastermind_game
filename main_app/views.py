@@ -136,16 +136,22 @@ def validate_guess(user_guess):
 
 
 def process_guess(user_guess, winning_combination):
-    # Responsile for analyzing the user's guess and provide feedback on its accuracy.
-    # Returns a tuple (correct_count, correct_position)
-    correct_count = 0
-    correct_position = 0
-    for i in range(4):
-        if user_guess[i] == winning_combination[i]:
-            correct_position += 1
+    correct_positions = [i for i in range(
+        4) if user_guess[i] == winning_combination[i]]
+    correct_count = len(correct_positions)
+    correct_position = correct_count
+
+    # Create copies of the lists to remove matched digits
+    unmatched_winning = [winning_combination[i]
+                         for i in range(4) if i not in correct_positions]
+    unmatched_guess = [user_guess[i]
+                       for i in range(4) if i not in correct_positions]
+
+    for digit in unmatched_guess:
+        if digit in unmatched_winning:
             correct_count += 1
-        elif user_guess[i] in winning_combination:
-            correct_count += 1
+            # Remove matched digit to prevent double counting
+            unmatched_winning.remove(digit)
 
     return correct_count, correct_position
 

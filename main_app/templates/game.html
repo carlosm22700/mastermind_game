@@ -2,11 +2,18 @@
 {% block content %}
 <h1>Mastermind Game</h1>
 <hr>
+{% if form.errors %}
+    <div class="error">
+        <!-- This will display any non-field-specific errors -->
+        {{ form.non_field_errors }}
+        <!-- This will display errors specific to the guess field -->
+        {{ form.guess.errors }}
+    </div>
+{% endif %}
 {% if game_id %}
     {% for guess_record in guess_history %}
         <p>Guess: {{ guess_record.guess }} | Correct Count: {{ guess_record.correct_count }} | Correct Position: {{ guess_record.correct_position }}</p>
     {% endfor %}
-
 
     <!-- Form for making a guess -->
     <form method="post" action="{% url 'game_board' %}">

@@ -1,8 +1,5 @@
 from django import forms
 
-# forms.py
-from django import forms
-
 
 class GuessForm(forms.Form):
     guess = forms.CharField(max_length=4, min_length=4)
