@@ -14,12 +14,20 @@ class MastermindGame:
         self.max_attempts = 10
         self._load_game_state()
 
+    '''
+    ## I think game state needs to be rechecked to end or continue game... but idk
+    '''
+
     def _load_game_state(self):
         # try to load the game state from the cache
+        # will return true if a game is already in session and saved in cache
         game_state = cache.get(self.session_id)
         if game_state:
             # Set the game state from cache
             self.winning_combinations, self.attempts, self.win_state = game_state
+            # Debug line to check if game state is loaded correctly:
+            print(
+                f"Debug: Game state loaded from cache: {self.winning_combinations}, {self.attempts}, {self.win_state}")
         else:
             # Initialize the game state from cache
             service = RandomNumberService()  # create instance of RandomNumberService class
@@ -54,6 +62,9 @@ class MastermindGame:
                 correct_count += 1
 
         self.attempts += 1
+        # Debugging line
+        print(
+            f"Debug: Attempts: {self.attempts}, Max attempts: {self.max_attempts}")
         self._save_game_state()  # Save updated state
 
         return correct_count, correct_position
@@ -74,7 +85,7 @@ def start_game(request):
 
 
 def make_guess(request):
-    if request.method == 'POST':
+    if request.method == 'POST' and 'session_id' in request.session:
         form = GuessForm(request.POST)
         if form.is_valid():
             user_guess = form.cleaned_data['guess']  # Get guess from form
@@ -83,6 +94,12 @@ def make_guess(request):
             session_id = request.session.get('session_id')
             if session_id:
                 game = MastermindGame(session_id)
+
+                if not check_attempts(game):
+                    request.session['game_over'] = True
+                    request.session['win'] = False
+                    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
                 correct_count, correct_position = game.process_guess(
                     user_guess)
                 # Debugging line
@@ -94,28 +111,26 @@ def make_guess(request):
                 request.session['correct_count'] = correct_count
                 request.session['correct_position'] = correct_position
 
-                # Check if game is over
-                if game.attempts >= game.max_attempts or game.check_win(user_guess):
-                    # Add additional information to the session if needed
-                    request.session['game_over'] = True
-                    request.session['win'] = game.check_win(user_guess)
+                # Check for a win
+                if game.check_win(user_guess):
+                    requst.session['game_over'] = True
+                    request.session['win'] = True
 
+        else:
+            request.session['error'] = "Invald input. Please enter four numbers (0-7)."
             # Redirect back to the home page to display the results
             return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
-        else:
-            # Handle invalid form
-            request.session['error'] = "Invalid input. Please enter four numbers (0-7)."
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-    else:
-        # Redirect if it's not a POST request
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 # Reset game
 
 
 def reset_game(request):
-    request.session.flush()
+    # Reset only game-related session keys
+    for key in ['session_id', 'last_guess', 'correct_count', 'correct_position', 'game_over', 'win']:
+        if key in request.session:
+            del request.session[key]
+
     return redirect('home')
 
 
@@ -128,3 +143,7 @@ def home(request):
         'form': GuessForm(),
     }
     return render(request, 'home.html', context)
+
+
+def check_attempts(game):
+    return game.attempts <= game.max_attempts

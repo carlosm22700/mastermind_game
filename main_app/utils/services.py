@@ -3,9 +3,9 @@ import requests
 
 class RandomNumberService:
     '''
-    Service handles fetching and preprocessing of api call to random number generator.
+    Service handles fetching and preprocessing of api call to random number generator which returns strings 0-7.
 
-    Returns a list of 4 numbers from 1-7 as strings (['1', '1', '4,', '7']) in a variable winning_combinations
+    Returns a list of 4 numbers from 1-7 as ints ([1, 1, 4, 7]) in a variable processed_response.
     '''
 
     def __init__(self):

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Welcome to Mastermind</h1>
+<hr>
+
+{% if game_over %}
+    {% if win %}
+        <p>Congratulations! You guessed the correct combination.</p>
+    {% else %}
+        <p>Game Over. You've reached the maximum number of attempts.</p>
+    {% endif %}
+    <form method="post" action="{% url 'reset_game' %}">
+        {% csrf_token %}
+        <button type="submit">Start New Game</button>
+    </form>
+{% else %}
+    {% if session_id %}
+        <p>Last Guess: {{ last_guess }}</p>
+        <p>Correct Count: {{ correct_count }}</p>
+        <p>Correct Position: {{ correct_position }}</p>
+
+        <!-- Form for making a guess -->
+        <form method="post" action="{% url 'make_guess' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit Guess</button>
+        </form>
+
+        <!-- Reset Game -->
+        <form method="post" action="{% url 'reset_game' %}">
+            {% csrf_token %}
+            <button type="submit">Reset Game</button>
+        </form>
+    {% else %}
+        <!-- Start Game -->
+        <form method="post" action="{% url 'start_game' %}">
+            {% csrf_token %}
+            <button type="submit">Start Game</button>
+        </form>
+    {% endif %}
+{% endif %}
+
+{% endblock %}
