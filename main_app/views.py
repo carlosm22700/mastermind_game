@@ -8,142 +8,200 @@ from .utils.services import RandomNumberService
 from .forms import GuessForm
 
 
-class MastermindGame:
-    def __init__(self, session_id):
-        self.session_id = session_id
-        self.max_attempts = 10
-        self._load_game_state()
-
+def home(request):
     '''
-    ## I think game state needs to be rechecked to end or continue game... but idk
+    Home view - starting point for the game.
     '''
+    return render(request, 'home.html')
 
-    def _load_game_state(self):
-        # try to load the game state from the cache
-        # will return true if a game is already in session and saved in cache
-        game_state = cache.get(self.session_id)
-        if game_state:
-            # Set the game state from cache
-            self.winning_combinations, self.attempts, self.win_state = game_state
-            # Debug line to check if game state is loaded correctly:
-            print(
-                f"Debug: Game state loaded from cache: {self.winning_combinations}, {self.attempts}, {self.win_state}")
-        else:
-            # Initialize the game state from cache
-            service = RandomNumberService()  # create instance of RandomNumberService class
-            # call api to generate array of 4 random integers (0-7)
-            self.winning_combinations = service.fetch_random_numbers()
-            # Debug line
-            print(
-                f"Debug: New game started with winning combination: {self.winning_combinations}")
-            self.attempts = 0  # reset number of attempts to 0
-            self.max_attempts = 10
-            self.win_state = False  # If won: True; if game lost/in progress: False
-            self._save_game_state()
 
-    def _save_game_state(self):
-        # Save the game state to the cache
-        game_state = (self.winning_combinations, self.attempts, self.win_state)
-        # Timeout can be adjusted
-        cache.set(self.session_id, game_state, timeout=3600)
+def generate_combination():
+    '''
+    Calls RandomNumberService module in ./utils/services  to generate a random combination of 4 numbers using random.org api.
+    '''
+    service = RandomNumberService()
+    return service.fetch_random_numbers()
 
-    def process_guess(self, user_guess):
-        # Convert user_guess string to a list of integers
-        user_guess_list = [int(num) for num in user_guess]
 
-        correct_count = 0
-        correct_position = 0
+winning_combination = generate_combination()
 
-        for i in range(4):
-            if user_guess_list[i] == self.winning_combinations[i]:
-                correct_position += 1
-                correct_count += 1
-            elif user_guess_list[i] in self.winning_combinations:
-                correct_count += 1
 
-        self.attempts += 1
-        # Debugging line
-        print(
-            f"Debug: Attempts: {self.attempts}, Max attempts: {self.max_attempts}")
-        self._save_game_state()  # Save updated state
-
-        return correct_count, correct_position
-
-    def check_win(self, user_guess):
-        return user_guess == self.winning_combinations
-
-# Start a new game
+def init(winning_combination):
+    '''
+    Initializes the game state.
+    '''
+    game_state = {
+        'last_guess': [],
+        'attempts': 0,
+        'win_state': False,
+        'game_over': False,
+        'winning_combination': winning_combination,
+        'guess_history': []
+    }
+    return game_state
 
 
 def start_game(request):
-    session_id = str(uuid.uuid4())
-    game = MastermindGame(session_id)
-    request.session['session_id'] = session_id  # Store session_id in session
-    return redirect('home')  # Redirect to home to display the game
+    '''
+    Starts a new game.
+    Generates a unique game ID and initializes the game state.
+    Stores the game state in Redis.
+    '''
+    game_id = str(uuid.uuid4())  # Generate a unique UUID for the game
+    game_state = init(winning_combination)  # initialize the game state
 
-# Make a guess
+    cache.set(game_id, game_state, timeout=3600)  # Store in Redis
+    request.session['game_id'] = game_id  # Store the game ID in the session
 
-
-def make_guess(request):
-    if request.method == 'POST' and 'session_id' in request.session:
-        form = GuessForm(request.POST)
-        if form.is_valid():
-            user_guess = form.cleaned_data['guess']  # Get guess from form
-            print(f"Debug: User guess is {user_guess}")  # Debugging line
-
-            session_id = request.session.get('session_id')
-            if session_id:
-                game = MastermindGame(session_id)
-
-                if not check_attempts(game):
-                    request.session['game_over'] = True
-                    request.session['win'] = False
-                    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-
-                correct_count, correct_position = game.process_guess(
-                    user_guess)
-                # Debugging line
-                print(
-                    f"Debug: Correct count: {correct_count}, Correct position: {correct_position}")
-
-                # Store results in session
-                request.session['last_guess'] = user_guess
-                request.session['correct_count'] = correct_count
-                request.session['correct_position'] = correct_position
-
-                # Check for a win
-                if game.check_win(user_guess):
-                    requst.session['game_over'] = True
-                    request.session['win'] = True
-
-        else:
-            request.session['error'] = "Invald input. Please enter four numbers (0-7)."
-            # Redirect back to the home page to display the results
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-# Reset game
+    return HttpResponseRedirect('/game/')  # Redirect to game board
 
 
-def reset_game(request):
-    # Reset only game-related session keys
-    for key in ['session_id', 'last_guess', 'correct_count', 'correct_position', 'game_over', 'win']:
-        if key in request.session:
-            del request.session[key]
+def game_board(request):
+    game_id = request.session.get('game_id')
+    if not game_id:
+        return HttpResponseRedirect('/')
 
-    return redirect('home')
+    game_state = cache.get(game_id)
+    if not game_state:
+        return HttpResponseRedirect('/')
 
+    form = GuessForm(request.POST or None)
+    if form.is_valid():
+        user_guess = cleanup_guess(form.cleaned_data['guess'])
+        if validate_guess(user_guess):
+            correct_count, correct_position = process_guess(
+                user_guess, game_state['winning_combination'])
+            game_over = update_game_state(
+                game_id, user_guess, correct_count, correct_position)
 
-def home(request):
+            # Re-fetch the updated game state
+            game_state = cache.get(game_id)
+
+            # Print the entire game state or specific parts for debugging
+            print("Updated Game State:", game_state)
+
+            if game_over:
+                return HttpResponseRedirect('/end_game/')
+
+            print("POST Request - Guess History:",
+                  game_state.get('guess_history'))
+
+            context = {
+                'form': form,
+                'last_guess': game_state.get('last_guess'),
+                'correct_count': game_state.get('correct_count'),
+                'correct_position': game_state.get('correct_position'),
+                'guess_history': game_state.get('guess_history'),
+                'game_id': game_id,
+            }
+            return render(request, 'game.html', context)
+
+    # Default context for initial GET request or if form is not valid
     context = {
-        'session_id': request.session.get('session_id'),
-        'last_guess': request.session.get('last_guess'),
-        'correct_count': request.session.get('correct_count'),
-        'correct_position': request.session.get('correct_position'),
-        'form': GuessForm(),
+        'form': form,
+        'last_guess': game_state.get('last_guess'),
+        'correct_count': game_state.get('correct_count'),
+        'correct_position': game_state.get('correct_position'),
+        'guess_history': game_state.get('guess_history'),
+        'game_id': game_id,
     }
-    return render(request, 'home.html', context)
+    return render(request, 'game.html', context)
 
 
-def check_attempts(game):
-    return game.attempts <= game.max_attempts
+def make_guess(game_id, user_guess):
+    pass
+
+
+def cleanup_guess(user_guess):
+    '''
+    Takes guess input and prepares for validation
+    return a list of 4 integers.
+    '''
+    return [int(digit) for digit in user_guess]
+
+
+def validate_guess(user_guess):
+    '''
+    Checks if the guess is valid (e.g., correct length, valid numbers).
+    Expect a list of integers.
+    Returns True if valid, False otherwise.
+    '''
+    for num in user_guess:
+        if num not in range(8):  # check if each digit is in range 0-7
+            return False
+        elif len(user_guess) != 4:  # check if guess is 4 digits long
+            return False
+
+    return True
+
+
+def process_guess(user_guess, winning_combination):
+    # Responsile for analyzing the user's guess and provide feedback on its accuracy.
+    # Returns a tuple (correct_count, correct_position)
+    correct_count = 0
+    correct_position = 0
+    for i in range(4):
+        if user_guess[i] == winning_combination[i]:
+            correct_position += 1
+            correct_count += 1
+        elif user_guess[i] in winning_combination:
+            correct_count += 1
+
+    return correct_count, correct_position
+
+
+def update_game_state(game_id, user_guess, correct_count, correct_position):
+    # Retrieves the game state from the cache
+    # Updates the game state with the new gameand results
+    # Saves the updates state back tot he cache
+    game_state = cache.get(game_id)
+
+    # If the game state is not found (expired or not started), handle appropriately
+
+    if not game_state:
+        return False  # Game state not found
+
+    # Update the game state
+    game_state['last_guess'] = user_guess
+    game_state['attempts'] += 1
+
+    # Update the guess history with the latest guess and its evaluation
+    guess_record = {
+        'guess': user_guess,
+        'correct_count': correct_count,
+        'correct_position': correct_position
+    }
+    game_state['guess_history'].append(guess_record)
+
+    # Check for win condition
+    if user_guess == winning_combination:
+        game_state['win_state'] = True
+        game_state['game_over'] = True
+
+    elif game_state['attempts'] >= 10:
+        game_state['game_over'] = True
+
+    # Add the guess record to the guess history
+
+    cache.set(game_id, game_state, timeout=3600)
+
+    return game_state['game_over']
+
+
+def end_game(request):
+    # Perform any necessary cleanup
+    # Redirect based on win or loss
+    game_id = request.session.get('game_id')
+    if not game_id:
+        return HttpResponseRedirect('/')  # Redirect to home if no game_id
+
+    game_state = cache.get(game_id)
+    if game_state.get('win_state'):
+        template = 'win.html'
+    else:
+        template = 'lose.html'
+
+    cache.delete(game_id)  # Delete the game state from the cache
+    del request.session['game_id']  # Delete the game ID from the session
+
+    return render(request, template)

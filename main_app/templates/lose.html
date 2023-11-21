@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Game Over</h1>
+<p>You've reached the maximum number of attempts.</p>
+<form method="post" action="{% url 'start_game' %}">
+    {% csrf_token %}
+    <button type="submit">Start New Game</button>
+</form>
+{% endblock %}
