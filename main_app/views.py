@@ -48,7 +48,9 @@ def start_game(request):
     Stores the game state in Redis.
     '''
     game_id = str(uuid.uuid4())  # Generate a unique UUID for the game
-    game_state = init(winning_combination)  # initialize the game state
+    # Generate a new winning combination
+    new_winning_combination = generate_combination()
+    game_state = init(new_winning_combination)  # Initialize the game state
 
     cache.set(game_id, game_state, timeout=3600)  # Store in Redis
     request.session['game_id'] = game_id  # Store the game ID in the session
@@ -137,16 +139,17 @@ def validate_guess(user_guess):
 
 def process_guess(user_guess, winning_combination):
     correct_positions = [i for i in range(
-        4) if user_guess[i] == winning_combination[i]]
+        4) if user_guess[i] == winning_combination[i]]  # This line creates an list of indices where the numbers match exactly between user_guess and the winning_combination
     correct_count = len(correct_positions)
     correct_position = correct_count
 
-    # Create copies of the lists to remove matched digits
-    unmatched_winning = [winning_combination[i]
+    # The following lines create new lists excluding the digits that have already been matched in the correct positions.
+    unmatched_winning = [winning_combination[i]  # This is the winning combination with the correct positions removed
                          for i in range(4) if i not in correct_positions]
-    unmatched_guess = [user_guess[i]
+    unmatched_guess = [user_guess[i]  # THis is the user's guess without the correctly positions digits.
                        for i in range(4) if i not in correct_positions]
 
+    # Iterate over the unmatched digits from the user's guess. If the digit is found in 'unmatched_winning'. increase correct_count by 1 and the remove that digit from unmatched_winning. This prevents double counting because the same digit can't be matched twice.
     for digit in unmatched_guess:
         if digit in unmatched_winning:
             correct_count += 1
@@ -180,7 +183,7 @@ def update_game_state(game_id, user_guess, correct_count, correct_position):
     game_state['guess_history'].append(guess_record)
 
     # Check for win condition
-    if user_guess == winning_combination:
+    if correct_position == 4:
         game_state['win_state'] = True
         game_state['game_over'] = True
 
