@@ -95,6 +95,7 @@ def game_board(request):
                 'correct_count': game_state.get('correct_count'),
                 'correct_position': game_state.get('correct_position'),
                 'guess_history': game_state.get('guess_history'),
+                'attempts': game_state.get('attempts'),
                 'game_id': game_id,
             }
             return render(request, 'game.html', context)
@@ -106,6 +107,7 @@ def game_board(request):
         'correct_count': game_state.get('correct_count'),
         'correct_position': game_state.get('correct_position'),
         'guess_history': game_state.get('guess_history'),
+        'attempts': game_state.get('attempts'),
         'game_id': game_id,
     }
     return render(request, 'game.html', context)

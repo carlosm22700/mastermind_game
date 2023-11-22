@@ -11,6 +11,7 @@
     </div>
 {% endif %}
 {% if game_id %}
+    <p>Attempts: {{ attempts }} / 10</p>
     {% for guess_record in guess_history %}
         <p>Guess: {{ guess_record.guess }} | Correct Count: {{ guess_record.correct_count }} | Correct Position: {{ guess_record.correct_position }}</p>
     {% endfor %}
