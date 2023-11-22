@@ -82,12 +82,13 @@ def game_board(request):
             # Print the entire game state or specific parts for debugging
             print("Updated Game State:", game_state)
 
-            if game_over:
+            if game_state['game_over']:
                 return HttpResponseRedirect('/end_game/')
 
             print("POST Request - Guess History:",
                   game_state.get('guess_history'))
 
+            # If the game is not over, render the gme board with the updated context.
             context = {
                 'form': form,
                 'last_guess': game_state.get('last_guess'),
@@ -174,6 +175,16 @@ def update_game_state(game_id, user_guess, correct_count, correct_position):
     game_state['last_guess'] = user_guess
     game_state['attempts'] += 1
 
+# Check for win condition nefpre adding the gueess to the history
+    if correct_position == 4:
+        game_state['win_state'] = True
+        game_state['game_over'] = True
+
+    elif game_state['attempts'] >= 10:
+        game_state['game_over'] = True
+        cache.set(game_id, game_state, timeout=3600)
+        return game_state['game_over']
+
     # Update the guess history with the latest guess and its evaluation
     guess_record = {
         'guess': user_guess,
@@ -183,12 +194,6 @@ def update_game_state(game_id, user_guess, correct_count, correct_position):
     game_state['guess_history'].append(guess_record)
 
     # Check for win condition
-    if correct_position == 4:
-        game_state['win_state'] = True
-        game_state['game_over'] = True
-
-    elif game_state['attempts'] >= 10:
-        game_state['game_over'] = True
 
     # Add the guess record to the guess history
 
