@@ -4,6 +4,7 @@ from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from .utils.services import RandomNumberService
+from random import randint as rand
 
 from .forms import GuessForm
 
@@ -107,7 +108,11 @@ class Game:
         self.save_game()
         return self.game_state['game_over']
 
-    def end_game(self, request):
+    def generate_hint(self):
+        i = rand(0, 3)
+        return "One of the digits is " + str(self.winning_combination[i])
+
+    def resolve_game(self, request):
         '''
         Performs cleanup and redirects based o win or loss.
         '''
@@ -117,6 +122,10 @@ class Game:
         else:
             template = 'lose.html'
 
-        cache.delete(self.game_id)  # Delete game state from cache
+        self.end_game()
 
         return render(request, template)
+
+    def end_game(self):
+
+        return cache.delete(self.game_id)  # Delete game state from cache
