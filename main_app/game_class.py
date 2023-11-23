@@ -65,6 +65,7 @@ class Game:
         correct_count = len(correct_positions)
         correct_position = correct_count
 
+        # Create lists of unmatched digits
         unmatched_winning = [self.winning_combination[i]
                              for i in range(4) if i not in correct_positions]
         unmatched_guess = [user_guess[i]

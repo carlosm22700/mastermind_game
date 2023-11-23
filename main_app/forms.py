@@ -9,4 +9,4 @@ class GuessForm(forms.Form):
         if not all(c.isdigit() and c in '01234567' for c in data):
             raise forms.ValidationError(
                 "Invalid input. Enter four numbers (0-7).")
-        return data
+        return [int(digit) for digit in data]

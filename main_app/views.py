@@ -28,7 +28,7 @@ def game_board(request):
 
     form = GuessForm(request.POST or None)
     if form.is_valid():
-        user_guess = [int(digit) for digit in form.cleaned_data['guess']]
+        user_guess = form.cleaned_data['guess']
         correct_count, correct_position = game.process_guess(user_guess)
         game_over = game.update_game_state(
             user_guess, correct_count, correct_position)
