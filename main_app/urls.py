@@ -6,4 +6,6 @@ urlpatterns = [
     path('game/', views.game_board, name='game_board'),
     path('start_game/', views.start_game, name='start_game'),
     path('resolve_game/', views.resolve_game, name='resolve_game'),
+    path('register/', views.register, name='register'),
+    path('login/', views.login, name='login'),
 ]

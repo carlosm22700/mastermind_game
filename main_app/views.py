@@ -1,15 +1,20 @@
-# Import Game class from Game.py
 from .game_class import Game
-from .forms import GuessForm
-
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.decorators import login_required
+
+from .forms import GuessForm, UserCreationForm, AuthenticationForm
+
+from .models import GameRecord
 
 
+@login_required(login_url='/login/')
 def home(request):
     return render(request, 'home.html')
 
 
+@login_required(login_url='/login/')
 def start_game(request):
     game = Game()
     game.start_game()
@@ -17,6 +22,7 @@ def start_game(request):
     return HttpResponseRedirect('/game/')
 
 
+@login_required(login_url='/login/')
 def game_board(request):
     game_id = request.session.get('game_id')
     if not game_id:
@@ -60,6 +66,7 @@ def game_board(request):
     return render(request, 'game.html', context)
 
 
+@login_required(login_url='/login/')
 def resolve_game(request):
     game_id = request.session.get('game_id')
     if not game_id:
@@ -67,6 +74,45 @@ def resolve_game(request):
 
     game = Game.load_game_state(game_id)
     if game:
+        if request.user.is_authenticated:
+            # Create a new GameRecord instance
+            if game.game_state.get('win_state'):
+                win = True
+            else:
+                win = False
+            GameRecord.objects.create(
+                user=request.user,
+                game_id=game_id,
+                win=win
+            )
+
         return game.resolve_game(request)
     else:
         return HttpResponseRedirect('/')  # Redirect to home if game not found.
+
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # Redirect to login page after successful registration
+            return redirect('login')
+
+    else:
+        form = UserCreationForm()
+
+    return render(request, 'register.html', {'form': form})
+
+
+def login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            auth_login(request, user)
+            return redirect('home')
+
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})

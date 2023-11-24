@@ -54,7 +54,7 @@ class Game:
 
     def generate_combination(self):
         '''
-        Calls RandomNumberService module in ./utils/services  to generate a random combination of 4 numbers using random.org api.
+        Calls RandomNumberService module in ./utils/services to generate a random combination of 4 numbers using random.org api.
         :return: list. A list of 4 randomly generated numbers.
         '''
         service = RandomNumberService()
@@ -76,7 +76,7 @@ class Game:
         :param user_guess: list. The user's guess, a list of 4 integers.
         :return: tuple. A tuple containing the count of correct numbers and the count of numbers in the correct position.
         '''
-        
+
         correct_positions = [i for i in range(
             4) if user_guess[i] == self.winning_combination[i]]
         correct_count = len(correct_positions)
