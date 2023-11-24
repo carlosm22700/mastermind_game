@@ -19,6 +19,7 @@
     {% csrf_token %}
     <button type="submit">Start Game</button>
 </form>
+<br>
 <form method="post" action="{% url 'logout_view' %}">
     {% csrf_token %}
     <button type="submit">Logout</button>

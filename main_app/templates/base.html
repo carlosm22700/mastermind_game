@@ -5,7 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Mastermind</title>
-  {% block css %}{% endblock css %}
+  <style>
+    /* Add your custom styles here */
+    * {
+      background-color: black;
+      color: #20c20e;
+    }
+    .instructions {
+      background-color: black;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+    }
+
+    .instructions h2 {
+      color: #20c20e;
+      font-size: 24px;
+    }
+
+    .instructions ol {
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
   <header class="navbar-fixed">
@@ -14,11 +39,22 @@
     </nav>
   </header>
   <main class="container">
+    <section class="instructions">
+      <h2>How to Play Mastermind</h2>
+      <ol>
+        <li><strong>Sign Up or Log In:</strong> To begin, create an account or sign in to an existing one.</li>
+        <li><strong>Start a New Game:</strong> Once you're on the home page, you can see your last 5 games and start a new game.</li>
+        <li><strong>Random Combination:</strong> Click 'Start Game' to generate a random winning combination and begin the timer.</li>
+        <li><strong>Make Your Guess:</strong> You have 5 minutes to guess a combination of 4 numbers from 0-7. Input your guess in the provided field.</li>
+        <li><strong>Time Limit:</strong> If you don't make a guess within 5 minutes, the session ends and you lose.</li>
+        <li><strong>Guess Evaluation:</strong> After each guess, the win condition is evaluated. You lose if the right combination isn't guessed within 10 attempts or if time runs out.</li>
+        <li><strong>Winning:</strong> Guessing the right combination results is a win!</li>
+        <li><strong>Quitting a Game:</strong> You can quit a game anytime by clicking the 'End Game' button, but this will count as a loss.</li>
+        <li><strong>Play Again:</strong> After each game, you can choose to play again by navigating back to the home page.</li>
+      </ol>
+    </section>
     {% block content %}{% endblock content %}
   </main>
-  <footer class="page-footer">
-    <div class="right">All Rights Reserved, &copy; Mastermind &nbsp;</div>
-  </footer>
   {% block js %}{% endblock js %}
 </body>
 </html>

@@ -26,7 +26,7 @@
         {{ form.as_p }}
         <button type="submit">Submit Guess</button>
     </form>
-
+    <br>
     <form method="post" action="{% url 'quit_game' %}">
         {% csrf_token %}
         <button type="submit">Quit Game</button>

@@ -3,14 +3,15 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-
 from .forms import GuessForm, UserCreationForm, AuthenticationForm
-
 from .models import GameRecord
 
 
 @login_required(login_url='/login/')
 def home(request):
+    '''
+    Display the home page and the last 5 games played by the user.
+    '''
     user_games = GameRecord.objects.filter(user=request.user).order_by(
         '-date')[:5]  # Fetch only the last 5 games; maybe implement pagination later
     context = {
@@ -21,6 +22,9 @@ def home(request):
 
 @login_required(login_url='/login/')
 def start_game(request):
+    '''
+    Start a new game and store game state in session
+    '''
     game = Game()
     game.start_game()
     request.session['game_id'] = game.game_id
@@ -29,12 +33,17 @@ def start_game(request):
 
 @login_required(login_url='/login/')
 def game_board(request):
+    '''
+    Main board where the user can play the game.
+    '''
     game_id = request.session.get('game_id')
     if not game_id:
+        # Redirect to home if game_id not found in session
         return HttpResponseRedirect('/')
 
     game = Game.load_game_state(game_id)
     if not game:
+        # Redirect to home if no game state is found
         return HttpResponseRedirect('/')
 
     form = GuessForm(request.POST or None)
@@ -46,9 +55,11 @@ def game_board(request):
         game_over = game.update_game_state(
             user_guess, correct_count, correct_position)
 
+        # Generate a hint if the user has made 5 attempts
         if game.game_state.get('attempts') > 5:
             hint = game.generate_hint()
 
+        # If the game is over, redirect to resolve game
         if game_over:
             return HttpResponseRedirect('/resolve_game/')
 
@@ -70,6 +81,8 @@ def game_board(request):
         'game_id': game_id,
     }
     return render(request, 'game.html', context)
+
+# Resolve the game and create a record of the outcome
 
 
 @login_required(login_url='/login/')
