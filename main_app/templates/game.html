@@ -25,5 +25,10 @@
         {{ form.as_p }}
         <button type="submit">Submit Guess</button>
     </form>
+    <!-- Button for making a guess -->
+    <form method="post" action="{% url 'quit_game' %}">
+    {% csrf_token %}
+    <button type="submit">Quit Game</button>
+</form>
 {% endif %}
 {% endblock %}

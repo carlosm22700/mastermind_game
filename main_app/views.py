@@ -1,7 +1,7 @@
 from .game_class import Game
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.contrib.auth import login as auth_login
+from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 
 from .forms import GuessForm, UserCreationForm, AuthenticationForm
@@ -91,6 +91,24 @@ def resolve_game(request):
         return HttpResponseRedirect('/')  # Redirect to home if game not found.
 
 
+def quit_game(request):
+    game_id = request.session.get('game_id')
+    if game_id:
+        game = Game.load_game_state(game_id)
+        if game:
+            if request.user.is_authenticated:
+                # Count as a Loss
+                GameRecord.objects.create(
+                    user=request.user,
+                    game_id=game_id,
+                    win=False
+                )
+            game.end_game()  # End the game
+        del request.session['game_id']  # Delete the game_id from session
+
+    return redirect('home')
+
+
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -116,3 +134,8 @@ def login(request):
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
+
+
+def logout_view(request):
+    auth_logout(request)
+    return redirect('home')
