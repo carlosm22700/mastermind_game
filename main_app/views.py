@@ -11,7 +11,8 @@ from .models import GameRecord
 
 @login_required(login_url='/login/')
 def home(request):
-    user_games = GameRecord.objects.filter(user=request.user).order_by('-date')
+    user_games = GameRecord.objects.filter(user=request.user).order_by(
+        '-date')[:5]  # Fetch only the last 5 games
     context = {
         'user_games': user_games,
     }
