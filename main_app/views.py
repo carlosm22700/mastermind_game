@@ -11,7 +11,11 @@ from .models import GameRecord
 
 @login_required(login_url='/login/')
 def home(request):
-    return render(request, 'home.html')
+    user_games = GameRecord.objects.filter(user=request.user).order_by('-date')
+    context = {
+        'user_games': user_games,
+    }
+    return render(request, 'home.html', context)
 
 
 @login_required(login_url='/login/')
@@ -91,6 +95,16 @@ def resolve_game(request):
         return HttpResponseRedirect('/')  # Redirect to home if game not found.
 
 
+# @login_required(login_url='/login/')
+# def game_history(request):
+#     user_games = GameRecord.objects.filter(user=request.user).order_by('-date')
+#     context = {
+#         'user_games': user_games,
+#     }
+#     return render(request, 'home', context)
+
+
+@login_required(login_url='/login/')
 def quit_game(request):
     game_id = request.session.get('game_id')
     if game_id:

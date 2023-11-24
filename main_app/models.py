@@ -7,3 +7,4 @@ class GameRecord(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE)
     win = models.BooleanField()  # True if the user won the game, False if they lost
+    date = models.DateTimeField(auto_now_add=True)

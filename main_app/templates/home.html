@@ -2,6 +2,19 @@
 {% block content %}
 <h1>Welcome to Mastermind</h1>
 <hr>
+<!-- Game history section -->
+<h2>Your Game History</h2>
+<ul>
+    {% for game in user_games %}
+    <!-- inside the loop in your home.html -->
+    <li>
+        Game ID: {{ game.game_id }} - Result: {{ game.win|yesno:"Won,Lost" }} - Date: {{ game.date|date:"Y-m-d H:i" }}
+    </li>
+    {% empty %}
+    <li>No games played yet.</li>
+    {% endfor %}
+</ul>
+
 <form method="post" action="{% url 'start_game' %}">
     {% csrf_token %}
     <button type="submit">Start Game</button>
