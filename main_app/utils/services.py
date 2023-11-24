@@ -33,8 +33,6 @@ class RandomNumberService:
             # if the HTTP
             else:
                 # Handle non-successful HTTP status code
-                print("Failed to fetch random numbers:", response.status_code)
                 return None
         except requests.RequestException as e:
-            print("Error occurred during API request:", e)
             return None

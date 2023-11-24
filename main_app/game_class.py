@@ -67,8 +67,6 @@ class Game:
         self.winning_combination = self.generate_combination()
         self.game_state = self.init_game_state()
         self.save_game()  # Store in Redis Cache
-        print(
-            f"Game started with ID {self.game_id}, Winning Combination: {self.winning_combination}")
 
     def process_guess(self, user_guess):
         '''
@@ -93,9 +91,6 @@ class Game:
                 correct_count += 1
                 unmatched_winning.remove(digit)
 
-        print(f"Processing guess: {user_guess}")
-        print(
-            f"Correct Count: {correct_count}, Correct Position: {correct_position}")
         return correct_count, correct_position
 
     def update_game_state(self, user_guess, correct_count, correct_position):
