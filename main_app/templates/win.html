@@ -2,8 +2,8 @@
 {% block content %}
 <h1>Congratulations!</h1>
 <p>You guessed the correct combination.</p>
-<form method="post" action="{% url 'start_game' %}">
+<form method="post" action="{% url 'home' %}">
     {% csrf_token %}
-    <button type="submit">Start New Game</button>
+    <button type="submit">Home</button>
 </form>
 {% endblock %}
