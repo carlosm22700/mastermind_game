@@ -12,7 +12,7 @@ from .models import GameRecord
 @login_required(login_url='/login/')
 def home(request):
     user_games = GameRecord.objects.filter(user=request.user).order_by(
-        '-date')[:5]  # Fetch only the last 5 games
+        '-date')[:5]  # Fetch only the last 5 games; maybe implement pagination later
     context = {
         'user_games': user_games,
     }
@@ -61,6 +61,7 @@ def game_board(request):
             'attempts': game.game_state.get('attempts'),
             'game_id': game_id,
             'hint': hint,
+            'winning_combination': game.winning_combination,
         }
         return render(request, 'game.html', context)
 

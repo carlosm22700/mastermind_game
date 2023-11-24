@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>EZMart</title>
+  <title>Mastermind</title>
+  {% block css %}{% endblock css %}
 </head>
 <body>
   <header class="navbar-fixed">
@@ -13,11 +14,11 @@
     </nav>
   </header>
   <main class="container">
-    {% block content %}
-    {% endblock %}
+    {% block content %}{% endblock content %}
   </main>
   <footer class="page-footer">
-    <div class="right">All Rights Reserved, &copy; 2021 Cat Collector &nbsp;</div>
+    <div class="right">All Rights Reserved, &copy; Mastermind &nbsp;</div>
   </footer>
+  {% block js %}{% endblock js %}
 </body>
 </html>

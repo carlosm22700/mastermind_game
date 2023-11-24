@@ -1,34 +1,62 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <h1>Mastermind Game</h1>
 <hr>
 {% if form.errors %}
     <div class="error">
-        <!-- This will display any non-field-specific errors -->
         {{ form.non_field_errors }}
-        <!-- This will display errors specific to the guess field -->
         {{ form.guess.errors }}
     </div>
 {% endif %}
+
 {% if game_id %}
+    <p id="time"></p>
     {% if hint %}
-    <p>Hint: {{ hint }}</p>
+        <button type="button" onclick="showAnswer()">Log Answer</button>
+        <p>Hint: {{ hint }}</p>
     {% endif %}
     <p>Attempts: {{ attempts }} / 10</p>
     {% for guess_record in guess_history %}
         <p>Guess: {{ guess_record.guess }} | Correct Count: {{ guess_record.correct_count }} | Correct Position: {{ guess_record.correct_position }}</p>
     {% endfor %}
 
-    <!-- Form for making a guess -->
     <form method="post" action="{% url 'game_board' %}">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Submit Guess</button>
     </form>
-    <!-- Button for making a guess -->
+
     <form method="post" action="{% url 'quit_game' %}">
-    {% csrf_token %}
-    <button type="submit">Quit Game</button>
-</form>
+        {% csrf_token %}
+        <button type="submit">Quit Game</button>
+    </form>
 {% endif %}
-{% endblock %}
+{% endblock content %}
+
+{% block js %}
+<script>
+    function startTimer(duration) {
+        var timer = duration, minutes, seconds;
+        var interval = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+            document.querySelector('#time').textContent = minutes + ":" + seconds;
+            if (--timer < 0) {
+                clearInterval(interval);
+                window.location.href = '/quit_game/';
+            }
+        }, 1000);
+    }
+
+    window.onload = function () {
+        startTimer(60 * 5);
+    };
+
+    function showAnswer() {
+        console.log("Winning Combination: {{ winning_combination }}");
+    }
+</script>
+{% endblock js %}
