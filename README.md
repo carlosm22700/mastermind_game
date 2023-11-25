@@ -9,15 +9,20 @@ Check out my Trello board: [Planning on Trello](https://trello.com/b/lle8pjV4/ma
 Visit the live deployment link above and follow these steps to play Mastermind:
 
 1. **Sign In or Sign Up**: Create an account or sign in to an existing one.
+![AuthPage](/main_app/assets/auth.png "AuthPage")
 2. **Start a New Game**: Click 'Start Game' to generate a random winning combination.
+![HomePage](/main_app/assets/home.png "HomePage")
 3. **Make Your Guess**: Enter your guess of four numbers (0-7) within 5 minutes.
+![GameBoard](/main_app/assets/game_board.png "GameBoard")
 4. **Check the Results**: After each guess, the game evaluates your input.
 5. **Game Over Conditions**: Failing to guess the combination within 10 attempts or letting the timer run out results in a game over.
 6. **Winning**: Correctly guessing the combination wins the game!
+![GameOver](/main_app/assets/gameover.png?raw=true "GameOver")
+![WinPage](/main_app/assets/win.png?raw=true "WinPage")
 
 ## Challenges and Scalability
 
-Throughout the development of this Mastermind game, I encountered several challenges that pushed me to make thoughtful decisions regarding the architecture and tech stack. Here are some key challenges and how I addressed them:
+Throughout the development of the game, I encountered several challenges that pushed me to make thoughtful decisions regarding the architecture and tech stack. Here are some key challenges and how I addressed them:
 
 - **Overengineering Prevention**: Initially, the temptation to over-engineer the solution was strong. I contemplated adding more layers of complexity, such as a front-end framework or additional features beyond the scope. However, staying focused on the project's requirements, I scaled back to ensure optimal performance and maintainability.
 
@@ -27,7 +32,7 @@ Throughout the development of this Mastermind game, I encountered several challe
 
 - **Future Growth**: The architecture and technologies used in this project are not only industry-standard but also flexible enough to accommodate future developments. Whether it's integrating a front-end framework, expanding the backend logic, or adding new features, the current setup provides a solid and scalable foundation.
 
-In conclusion, the Mastermind game, as developed, serves as a testament to agile development and scalability. The project, while fulfilling its current objectives, is structured in a way that invites further expansion and complexity, demonstrating the potential for continued growth and evolution.
+In conclusion, the Mastermind game, as developed, serves as a testament to agile development and scalability. The project, while fulfilling its objectives, is structured in a way that allows further expansion and complexity, demonstrating the potential for scalability.
 
 
 ## Technologies Used
@@ -81,11 +86,3 @@ Please adhere to the project's coding standards and include tests where applicab
 - **Difficulty Modes**: Additional modes, including a Wordle-style variant with string guesses.
 
 *Note: These features are prospective and not currently implemented.*
-
-## Deployment
-
-The app is deployed on Heroku. To replicate the deployment process or run your own instance, refer to the deployment guide at the start of this document.
-
----
-
-Remember to replace the Heroku link with your actual app's URL and adjust any sections as necessary to fit your project's specifics.
