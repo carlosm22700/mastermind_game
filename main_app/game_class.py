@@ -144,9 +144,15 @@ class Game:
         else:
             template = 'lose.html'
 
+        context = {
+            'last_guess': self.game_state.get('last_guess'),
+            'winning_combination': self.winning_combination,
+            'win': self.game_state.get('win_state')
+        }
+
         self.end_game()
 
-        return render(request, template)
+        return render(request, template, context)
 
     def end_game(self):
         '''

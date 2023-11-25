@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Game Over</h1>
-<p>You've reached the maximum number of attempts.</p>
+<p>You've reached the maximum number of attempts or you took too long to guess.</p>
+<p>Your last guess was: {{ last_guess }}</p>
+<p>The correct combination was: {{ winning_combination }}</p>
 <form method="post" action="{% url 'home' %}">
     {% csrf_token %}
     <button type="submit">Home</button>
