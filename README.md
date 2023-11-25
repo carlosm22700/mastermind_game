@@ -2,6 +2,8 @@
 
 Play the game here: [Mastermind on Heroku](https://mastermind-1124-c25a7a9dfcb2.herokuapp.com/login/)
 
+Check out my Trello board: [Planning on Trello](https://trello.com/b/lle8pjV4/mastermindplanning)
+
 ## How to Play
 
 Visit the live deployment link above and follow these steps to play Mastermind:
